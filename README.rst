@@ -18,7 +18,7 @@ bigcli
      :alt: Updates
 
 
-A python framwork to write large CLIs using dependency injection, highly testable and reusable
+A python framework to write large CLIs
 
 
 * Free software: MIT license
@@ -28,7 +28,8 @@ A python framwork to write large CLIs using dependency injection, highly testabl
 Features
 --------
 
-* TODO
+* Auto generates parsers and commands
+* Allows for reuse of components through dependency injection
 
 Credits
 ---------
