@@ -25,6 +25,39 @@ A python framework to write large CLIs
 * Documentation: https://bigcli.readthedocs.io.
 
 
+Example
+-------
+
+.. code-block:: python
+  #!/usr/bin/env python
+  import bigcli
+
+
+  class WhoMoves(object):
+      __args__ = [bigcli.arg('--who-moves', default="she")]
+
+      def __init__(self, args):
+          self.who = args.who_moves
+
+
+  class InTheWay(object):
+      __depends_on__ = [WhoMoves]
+
+      def __init__(self, who_moves):
+          self.who = who_moves.who
+
+      def __call__(self):
+          print "{} moves".format(self.who)
+
+
+  if __name__ == "__main__":
+      bigcli.BigCli(commands=[InTheWay]).execute()
+
+
+  # $ ./something.py in-the-way --who-moves
+  # > she moves
+
+
 Features
 --------
 
