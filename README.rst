@@ -29,6 +29,7 @@ Example
 -------
 
 .. code-block:: python
+
    #!/usr/bin/env python
    import bigcli
  
