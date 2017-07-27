@@ -1,14 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
-"""Tests for `bigcli` package."""
-
-
+from __future__ import print_function
+from mock import patch, call
 import unittest
-from click.testing import CliRunner
 
-from bigcli import bigcli
-from bigcli import cli
+import bigcli
 
 class DomainObject(object):
     __args__ = [
@@ -28,7 +22,8 @@ class ExampleCommand(object):
         self.domain_object = domain_object
 
     def __call__(self, *args, **kwargs):
-        pass
+        print(self.domain_object.password)
+        print(self.domain_object.value)
 
 
 class TestBigcli(unittest.TestCase):
@@ -40,8 +35,14 @@ class TestBigcli(unittest.TestCase):
         self.assertEqual('a_value', parsed_args.value)
         self.assertEqual('notmypassword', parsed_args.password)
 
-        command_object = cli.provide(ExampleCommand, parsed_args)
+        command_object = cli._provide(ExampleCommand, parsed_args)
 
         self.assertEqual('a_value', command_object.domain_object.value)
         self.assertEqual('notmypassword', command_object.domain_object.password)
 
+    @patch('tests.test_bigcli.print')
+    def test_execute(self, print_mock):
+        bigcli.BigCli(commands=[ExampleCommand]).execute(['example-command', 'a_value', '--password', 'notmypassword'])
+
+        print_mock.assert_has_calls([call('notmypassword'), call('a_value')])
+       

@@ -13,46 +13,59 @@ def commandize(class_name):
     return re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1).lower()
 
 
-def init_parser(commands, *args, **kwargs):
-    """
-    TODO: docs
-    """
-    def get_all_args(dependencies):
-        if not isinstance(dependencies, list):
-            return dependencies.__dict__.get('__args__', [])
-        if len(dependencies) == 0:
-            return []
-        else:
-            return get_all_args(dependencies[0]) + \
-                    get_all_args(dependencies[1:])
-
-    parser = argparse.ArgumentParser(**kwargs)
-    sp = parser.add_subparsers(dest='command')
-    for command in commands:
-        p = sp.add_parser(commandize(command.__name__))
-        [arg_fn(p) for arg_fn in get_all_args(command.__depends_on__)]
-    return parser
-
-
 class BigCli(object):
     """
     TODO: docs
     """
     def __init__(self, commands, *args, **kwargs):
-        self.__object_graph = None
-        self.parser = init_parser(commands)
+        self.__commands = {}
+        self.parser = self._init_parser(commands, **kwargs)
 
-    def provide(self, clazz, parsed_args):
+    def execute(self, args=None):
         """
         TODO: docs
         """
+        parsed_args = self.parser.parse_args(args) if args else self.parser.parse_args()
+        command_class = self.__commands[parsed_args.command]
+        self._provide(command_class, parsed_args)()
+
+    def _register_command_class(self, command_name, command_class):
+        self.__commands[command_name] = command_class
+
+    def _init_parser(self, commands, **kwargs):
+        def get_all_args(dependencies):
+            if len(dependencies) == 0:
+                return []
+
+            args = dependencies[0].__dict__.get('__args__', [])
+            command_dependencies = dependencies[0].__dict__.get('__depends_on__', [])
+
+            return args + get_all_args(command_dependencies + dependencies[1:])  # return any arg the command may have plus get_all_args for all dependencies
+
+        parser = argparse.ArgumentParser(**kwargs)
+        sp = parser.add_subparsers(dest='command')
+
+        for command_class in commands:
+            # register class as command
+            actual_command_name = commandize(command_class.__name__)
+            self._register_command_class(actual_command_name, command_class)
+
+            # init parser for command name
+            p = sp.add_parser(actual_command_name)
+
+            # get all lambda args recursively and apply them to the new parser
+            all_lambda_args = get_all_args([command_class])
+            [arg_fn(p) for arg_fn in all_lambda_args]
+        return parser
+
+    def _provide(self, clazz, parsed_args, extra_binding_specs=None):
         class DipBindingSpec(pinject.BindingSpec):
             @pinject.provides(in_scope=pinject.PROTOTYPE)
             def provide_args(self):
                 return parsed_args
 
-        return pinject.new_object_graph(
-            binding_specs=[DipBindingSpec()]).provide(clazz)
+        binding_specs = [DipBindingSpec()] + (extra_binding_specs or [])
+        return pinject.new_object_graph(binding_specs=binding_specs).provide(clazz)
 
 
 def arg(arg_action_name, *args, **kwargs):
