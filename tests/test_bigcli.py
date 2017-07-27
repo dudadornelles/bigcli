@@ -10,22 +10,22 @@ from click.testing import CliRunner
 from bigcli import bigcli
 from bigcli import cli
 
-class AClient(object):
+class DomainObject(object):
     __args__ = [
-        bigcli.arg('--foo', help='foo help', required=True),
-        bigcli.arg('bar', help='bar help')
+        bigcli.arg('--password', help='the password', required=True),
+        bigcli.arg('value', help='a value')
     ]
 
     def __init__(self, args):
-       self.foo = args.foo
-       self.bar = args.bar
+       self.password = args.password
+       self.value = args.value
 
 
-class Command(object):
-    __depends_on__ = [AClient]
+class ExampleCommand(object):
+    __depends_on__ = [DomainObject]
 
-    def __init__(self, a_client):
-        self.a_client = a_client
+    def __init__(self, domain_object):
+        self.domain_object = domain_object
 
     def __call__(self, *args, **kwargs):
         pass
@@ -33,7 +33,15 @@ class Command(object):
 
 class TestBigcli(unittest.TestCase):
 
-    def test_creates_parser(self):
-        cli = bigcli.BigCli(commands=[Command])
+    def test_creates_parser_and_provides_complete_command_object(self):
+        cli = bigcli.BigCli(commands=[ExampleCommand])
 
-        cli.parser
+        parsed_args = cli.parser.parse_args(['example-command', 'a_value', '--password', 'notmypassword'])
+        self.assertEqual('a_value', parsed_args.value)
+        self.assertEqual('notmypassword', parsed_args.password)
+
+        command_object = cli.provide(ExampleCommand, parsed_args)
+
+        self.assertEqual('a_value', command_object.domain_object.value)
+        self.assertEqual('notmypassword', command_object.domain_object.password)
+
