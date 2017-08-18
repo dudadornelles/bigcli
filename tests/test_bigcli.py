@@ -26,6 +26,12 @@ class ExampleCommand(object):
         print(self.domain_object.value)
 
 
+class ExampleSubcommand(object):
+    __parent__ = "parent-command"
+
+    def __call__(self, *args, **kwargs):
+        print("subcommand executed")
+
 class TestBigcli(unittest.TestCase):
 
     def test_creates_parser_and_provides_complete_command_object(self):
@@ -45,4 +51,9 @@ class TestBigcli(unittest.TestCase):
         bigcli.BigCli(commands=[ExampleCommand]).execute(['example-command', 'a_value', '--password', 'notmypassword'])
 
         print_mock.assert_has_calls([call('notmypassword'), call('a_value')])
-       
+
+    @patch('tests.test_bigcli.print')
+    def test_execute_subcommand(self, print_mock):
+        bigcli.BigCli(commands=[ExampleSubcommand]).execute(['parent-command', 'example-subcommand'])
+
+        print_mock.assert_called_with("subcommand executed")

@@ -18,7 +18,7 @@ class BigCli(object):
     TODO: docs
     """
     def __init__(self, commands, *args, **kwargs):
-        self.__commands = {}
+        self._commands = {}
         self.parser = self._init_parser(commands, **kwargs)
 
     def execute(self, args=None):
@@ -26,11 +26,13 @@ class BigCli(object):
         TODO: docs
         """
         parsed_args = self.parser.parse_args(args) if args else self.parser.parse_args()
-        command_class = self.__commands[parsed_args.command]
+        command_class = self._commands[parsed_args.command]
+        if parsed_args.__dict__.get('subcommand'):
+            command_class = command_class[parsed_args.subcommand]
         self._provide(command_class, parsed_args)()
 
     def _register_command_class(self, command_name, command_class):
-        self.__commands[command_name] = command_class
+        self._commands[command_name] = command_class
 
     def _init_parser(self, commands, **kwargs):
         def get_all_args(dependencies):
@@ -46,16 +48,29 @@ class BigCli(object):
         sp = parser.add_subparsers(dest='command')
 
         for command_class in commands:
-            # register class as command
             actual_command_name = commandize(command_class.__name__)
-            self._register_command_class(actual_command_name, command_class)
 
-            # init parser for command name
-            p = sp.add_parser(actual_command_name)
+            if command_class.__dict__.get('__parent__'):
+                # register class as a subcommand of __parent__
+                parent_command = command_class.__dict__.get('__parent__')
+                if not self._commands.get(parent_command):
+                    self._commands[parent_command] = {} 
+                self._commands[parent_command][actual_command_name] = command_class
+
+                ssp = sp.add_parser(name=parent_command)
+                sssp = ssp.add_subparsers(dest='subcommand') 
+                p = sssp.add_parser(actual_command_name)
+            else:
+                # register class as command
+                self._register_command_class(actual_command_name, command_class)
+
+                # init parser for command name
+                p = sp.add_parser(actual_command_name)
 
             # get all lambda args recursively and apply them to the new parser
             all_lambda_args = get_all_args([command_class])
             [arg_fn(p) for arg_fn in all_lambda_args]
+
         return parser
 
     def _provide(self, clazz, parsed_args, extra_binding_specs=None):
