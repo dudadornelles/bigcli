@@ -42,6 +42,7 @@ Minimal example:
  
  
    class Command(object):
+       __parent__ = 'sub-command'
        __depends_on__ = [Dependency]
  
        def __init__(self, dependency):
@@ -55,7 +56,7 @@ Minimal example:
        bigcli.BigCli(commands=[Command]).execute()
  
  
-   # $ ./example.py command --option value
+   # $ ./example.py sub-command command --option value
    # > dependency option: value
  
  
