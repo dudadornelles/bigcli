@@ -20,7 +20,7 @@ bigcli
 
 A python framework to write large CLIs. The concept is to automagically derive CLI commands and args based on the object graph of a callable class that implements a CLI command (command name is derived from the class name). It uses argparse_ to create the CLI parser and pinject_ as the Dependency_Injection_ engine. You implement a class - e.g.: ``DoSomething``- and that generates the name of a subcommand - e.g: ``do-something``. Then, based on the dependencies of class ``DoSomething``, we will derive the arguments, e.g.: if ``DoSomething`` depends on ``Dependency``, which in turn declares ``__args__ = [bigcli.arg('--option', required=False, help='help')]`` (add_argument_ method from argparse_), then command ``do-something`` will have a '--option' argument.
 
-In theory, the auto-generation of arguments should enables and (hopefully) encourage the reuse of internal components for rapid and consistent development of rich CLIs, especially those that operate platforms.
+In theory, the auto-generation of arguments should enables and encourage the reuse of internal components for rapid development of consistent and testable rich CLIs, especially those that operate platforms.
 
 * Free software: MIT license
 * Documentation: https://bigcli.readthedocs.io.
