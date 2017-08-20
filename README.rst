@@ -22,20 +22,10 @@ A python framework to write large CLIs. The concept is to automagically derive C
 
 The auto-generation of args enables and encourages the reuse of internal components for rapid and consistent development of rich CLIs, especially those that operate platforms.
 
-Minimal example:
-----------------
-
-.. code-block:: python
-
-.. _add_argument: https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.add_argument
-.. _argparse: https://docs.python.org/2/howto/argparse.html
-.. _pinject: https://github.com/google/pinject
-
 * Free software: MIT license
 * Documentation: https://bigcli.readthedocs.io.
 
-
-Example
+Minimal example:
 -------
 
 .. code-block:: python
@@ -69,11 +59,11 @@ Example
    # > dependency option: value
  
  
-Features
+Features (see tests for example)
 --------
 
-* Auto generates parsers and commands
-* Allows for reuse of components through dependency injection
+* Auto generates parsers and commands using the ``__depends_on__`` and ``__args__`` attributes.
+* Supports adding single subcommand using the ``__parent__ = 'subcommand'`` attribute.
 
 Known Issues:
 -------------
@@ -88,4 +78,6 @@ This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypack
 
 .. _Cookiecutter: https://github.com/audreyr/cookiecutter
 .. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
-
+.. _add_argument: https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.add_argument
+.. _argparse: https://docs.python.org/2/howto/argparse.html
+.. _pinject: https://github.com/google/pinject
