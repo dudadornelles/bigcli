@@ -35,8 +35,10 @@ Minimal example:
  
  
    class Dependency(object):
-       __args__ = [bigcli.arg('--option')]
- 
+       __args__ = [
+           bigcli.arg('--option') #  short for ``lambda p: p.add_argument('--option')``
+       ]
+       
        def __init__(self, args):
            self.option = args.option
  
