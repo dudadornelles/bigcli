@@ -22,6 +22,11 @@ A python framework to write large CLIs. The concept is to automagically derive C
 
 The auto-generation of args enables and encourages the reuse of internal components for rapid and consistent development of rich CLIs, especially those that operate platforms.
 
+Minimal example:
+----------------
+
+.. code-block:: python
+
 .. _add_argument: https://docs.python.org/3/library/argparse.html#argparse.ArgumentParser.add_argument
 .. _argparse: https://docs.python.org/2/howto/argparse.html
 .. _pinject: https://github.com/google/pinject
@@ -39,29 +44,29 @@ Example
    import bigcli
  
  
-   class WhoMoves(object):
-       __args__ = [bigcli.arg('--who-moves', default="she")]
+   class Dependency(object):
+       __args__ = [bigcli.arg('--option')]
  
        def __init__(self, args):
-           self.who = args.who_moves
+           self.option = args.option
  
  
-   class InTheWay(object):
-       __depends_on__ = [WhoMoves]
+   class Command(object):
+       __depends_on__ = [Dependency]
  
-       def __init__(self, who_moves):
-           self.who = who_moves.who
+       def __init__(self, dependency):
+           self.dependency = dependency
  
        def __call__(self):
-           print "{} moves".format(self.who)
+           print "dependency option: {}".format(self.dependency.option)
  
  
    if __name__ == "__main__":
-       bigcli.BigCli(commands=[InTheWay]).execute()
+       bigcli.BigCli(commands=[Command]).execute()
  
  
-   # $ ./something.py in-the-way --who-moves
-   # > she moves
+   # $ ./example.py command --option value
+   # > dependency option: value
  
  
 Features
@@ -69,6 +74,12 @@ Features
 
 * Auto generates parsers and commands
 * Allows for reuse of components through dependency injection
+
+Known Issues:
+-------------
+
+* Only supports python 2.7 because pinject_ only supports python 2.7.
+* Class names should have more than a single letter (pinject know issue, not documented anywhere AFAIK).
 
 Credits
 ---------
