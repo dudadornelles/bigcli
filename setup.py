@@ -27,7 +27,7 @@ test_requirements = [
 
 setup(
     name='bigcli',
-    version='0.1.2',
+    version='0.1.3',
     description="A python framwork to write large CLIs using dependency injection",
     long_description=readme + '\n\n' + history,
     author="Duda Dornelles",
