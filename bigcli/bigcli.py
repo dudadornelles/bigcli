@@ -2,6 +2,8 @@
 import re
 import argparse
 import pinject
+import pydoc
+from sys import exit
 
 
 def commandize(class_name):
@@ -11,6 +13,29 @@ def commandize(class_name):
     """
     s1 = re.sub('(.)([A-Z][a-z]+)', r'\1-\2', class_name)
     return re.sub('([a-z0-9])([A-Z])', r'\1-\2', s1).lower()
+
+
+class ShortHelpAction(argparse.Action):
+    def __init__(self, option_strings, dest, **kwargs):
+        super(ShortHelpAction, self).__init__(option_strings, dest, nargs=0, help='print usage')
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        parser.print_help()
+        exit(0)
+
+
+class ExtendedHelpAction(argparse.Action):
+    def __init__(self, option_strings, dest, **kwargs):
+        super(ExtendedHelpAction, self).__init__(option_strings, dest, nargs=0,
+                                                 help='Print extended help')
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        command_class = parser._defaults.get('__bigcli_meta_command_class')
+        if command_class and command_class.__doc__:
+            pydoc.pager(command_class.__doc__)
+        else:
+            parser.print_usage()
+        exit(0)
 
 
 class BigCli(object):
@@ -44,8 +69,21 @@ class BigCli(object):
 
             return args + get_all_args(command_dependencies + dependencies[1:])  # return any arg the command may have plus get_all_args for all dependencies
 
+        help_parser = argparse.ArgumentParser(add_help=False)
+        help_parser.add_argument('--help', action=ExtendedHelpAction)
+        help_parser.add_argument('-h', action=ShortHelpAction)
+        kwargs['add_help'] = False
+        kwargs['parents'] = [help_parser]
+
         parser = argparse.ArgumentParser(**kwargs)
         sp = parser.add_subparsers(dest='command')
+            
+        def mkhelpparser(command_class):
+            help_parser = argparse.ArgumentParser(add_help=False)
+            help_parser.add_argument('--help', action=ExtendedHelpAction)
+            help_parser.add_argument('-h', action=ShortHelpAction)
+            help_parser._defaults.update({'__bigcli_meta_command_class': command_class})
+            return help_parser
 
         for command_class in commands:
             actual_command_name = commandize(command_class.__name__)
@@ -59,13 +97,13 @@ class BigCli(object):
 
                 ssp = sp.add_parser(name=parent_command)
                 sssp = ssp.add_subparsers(dest='subcommand') 
-                p = sssp.add_parser(actual_command_name)
+                p = sssp.add_parser(actual_command_name, parents=[help_parser], add_help=False)
             else:
                 # register class as command
                 self._register_command_class(actual_command_name, command_class)
 
                 # init parser for command name
-                p = sp.add_parser(actual_command_name)
+                p = sp.add_parser(actual_command_name, parents=[mkhelpparser(command_class)], add_help=False)
 
             # get all lambda args recursively and apply them to the new parser
             all_lambda_args = get_all_args([command_class])
