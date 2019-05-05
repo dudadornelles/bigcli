@@ -11,10 +11,6 @@ with open('README.rst') as readme_file:
 with open('HISTORY.rst') as history_file:
     history = history_file.read()
 
-requirements = [
-    'pinject'
-]
-
 setup(
     name='bigcli',
     version='0.2.0',
@@ -25,7 +21,7 @@ setup(
     url='https://github.com/dudadornelles/bigcli',
     packages=find_packages(include=['bigcli']),
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=['pinject'],
     license="MIT license",
     zip_safe=False,
     keywords='bigcli',
@@ -37,6 +33,6 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     test_suite='tests',
-    tests_require=test_requirements,
-    setup_requires=setup_requirements,
+    tests_require=[],
+    setup_requires=[],
 )
