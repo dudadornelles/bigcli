@@ -13,21 +13,11 @@ with open('HISTORY.rst') as history_file:
 
 requirements = [
     'pinject'
-    # TODO: put package requirements here
-]
-
-setup_requirements = [
-    # TODO(dudadornelles): put setup requirements (distutils extensions, etc.) here
-]
-
-test_requirements = [
-    'mock'
-    # TODO: put package test requirements here
 ]
 
 setup(
     name='bigcli',
-    version='0.1.2',
+    version='0.2.0',
     description="A python framwork to write large CLIs using dependency injection",
     long_description=readme + '\n\n' + history,
     author="Duda Dornelles",
@@ -44,7 +34,7 @@ setup(
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.7',
     ],
     test_suite='tests',
     tests_require=test_requirements,
